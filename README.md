@@ -1,0 +1,149 @@
+# Bazel 示例
+
+# 环境
+- C++ 11
+- Bazel 6.2.1
+- Java 11
+- MacOs(Clion) & Debian
+
+# 开始
+
+1. 定义一个 `WORKSPACE` 文件，主要是申明一下 项目的依赖关系
+
+```python
+# 项目名称
+workspace(name = "bazel_demo")
+
+# init project dep
+load("//:project_deps.bzl", "project_dependencies")
+
+project_dependencies()
+
+# init protobuf dep
+# https://github.com/bazelbuild/rules_proto/releases/tag/4.0.0
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "rules_proto",
+    sha256 = "66bfdf8782796239d3875d37e7de19b1d94301e8972b3cbd2446b332429b4df1",
+    strip_prefix = "rules_proto-4.0.0",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0.tar.gz",
+        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/4.0.0.tar.gz",
+    ],
+)
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+
+rules_proto_dependencies()
+
+rules_proto_toolchains()
+```
+
+
+2. 定义 `BUILD` 文件
+
+```python
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+# main: 表示这个目标的名称
+# src: 表示源文件
+# deps: 表示依赖
+cc_binary(
+    name = "main",
+    srcs = [
+        "main.cpp",
+    ],
+    deps = [
+        "//src/model",  # or "//src/model:model"
+        "//src/utils",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+    ],
+)
+
+```
+
+3. 编译Protobuf
+
+```shell
+➜  bazel_demo git:(master) ✗ tree -L 2 src/model/
+src/model/
+├── BUILD
+├── common.proto
+└── model.proto
+```
+
+> 注意PB include 是基于项目根路径进行引用
+
+- BUILD 文件
+
+```python
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+# 定义pb文件
+proto_library(
+    name = "model_proto",
+    srcs = [
+        "common.proto",
+        "model.proto",
+    ],
+    deps = [
+        "@com_google_protobuf//:any_proto",
+    ],
+)
+
+# 编译cpp文件
+cc_proto_library(
+    name = "model",
+    visibility = ["//visibility:public"],
+    deps = [":model_proto"],
+)
+```
+
+4. 编译
+
+```shell
+➜  bazel_demo git:(master) ✗ bazel build //:main
+INFO: Analyzed target //:main (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+Target //:main up-to-date:
+  bazel-bin/main
+INFO: Elapsed time: 0.193s, Critical Path: 0.01s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+```
+
+# 使用
+
+1. http_archive https://bazel.build/rules/lib/repo/http#http_archive
+
+```shell
+http_archive(
+	name = "com_google_absl",  # namespace name
+	urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.1.tar.gz"],  # 下载地址
+	strip_prefix = "abseil-cpp-20220623.1",
+	sha256 = "91ac87d30cc6d79f9ab974c51874a704de9c2647c40f6932597329a282217ba8",  # 下载文件的sha256，这个你不写也行
+)
+```
+
+我觉得大家比较疑惑的是 strip_prefix，本质上就是因为我们下载的这些依赖文件吧，解压出来的路径有问题，需要移除掉有问题的前缀路径，最终需要此路径可以查找到`WORKSPACE` 文件
+
+```shell
+# 1. 下载
+wget https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.1.tar.gz
+# 2. 解压
+tar -zxvf 20220623.1.tar.gz
+# 3. http_archive 需要寻找解压文件的 WORKSPACE 文件, 因此需要 strip_prefix `abseil-cpp-20220623.1`
+➜  software ls -al  abseil-cpp-20220623.1 | grep 'WORKSPACE'
+-rw-r--r--  1 bytedance staff  2556  9  1  2022 WORKSPACE
+```
+
+2. proto_library https://docs.bazel.build/versions/master/be/protocol-buffer.html#proto_library
+
+# 一些问题
+1. Bazel 的进阶资料特别少，只能看官方文档了，以及参考一些开源项目的实践
+2. 开发者工具的话，这里也就只能用 clion 了，但是不太友好感觉
+3. include 的问题，bazel里大部分都是源码构建，所以基本上需要使用: `include "xxx"` , 具体可以看 https://stackoverflow.com/questions/21593/what-is-the-difference-between-include-filename-and-include-filename
+4. 限制bazel构建版本:  `.bazelversion` 文件填入版本
+5. bazel构建配置: `.bazelrc` 文件填入构建配置

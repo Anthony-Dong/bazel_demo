@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+package Example.Model;
+
+enum Status {
+  On = 0;
+  Off = 1;
+}
