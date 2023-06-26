@@ -1,7 +1,15 @@
-.PHONY: run test
+.PHONY: run test build
+
+BAZEL ?= bazel
 
 run:
-	bazel run //:main
+	$(BAZEL) run //:main
 
-test:
-	bazel run //src/utils:time_test
+#test:
+#	$(BAZEL) run //src/utils:time_test
+
+test: ## https://google.github.io/googletest/quickstart-bazel.html
+	$(BAZEL) test --test_output=all //...
+
+build:
+	$(BAZEL) build //...
