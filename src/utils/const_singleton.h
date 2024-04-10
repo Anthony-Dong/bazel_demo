@@ -17,9 +17,9 @@
 
 #pragma once
 
-namespace Example {
+namespace example {
 
-namespace Utils {
+namespace utils {
 
 /**
  * ConstSingleton allows easy global cross-thread access to a const object.

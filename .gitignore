@@ -1,3 +1,6 @@
-.clwb
-bazel*
-.vscode
+/.clwb
+/.idea
+/bazel*
+/output
+/external
+/compile_commands.json

@@ -1,0 +1,35 @@
+{
+    // define cc/cxx
+    "terminal.integrated.env.osx": {
+        "CC": "/usr/local/opt/llvm@14/bin/clang",
+        "CXX": "/usr/local/opt/llvm@14/bin/clang++"
+    },
+    "terminal.integrated.env.linux": {
+        "CC": "/usr/bin/clang-14",
+        "CXX": "/usr/bin/clang++-14"
+    },
+    "bazel.executable": "bazel",
+    "bazel.buildifierExecutable": "buildifier",
+    "bazel.buildifierFixOnFormat": true,
+    // bazel 'build' '--cxxopt=-std=c++17' '--host_cxxopt=-std=c++17' '--compilation_mode=dbg' '//:main' 
+    "bazel.commandLine.commandArgs": [
+        "--compilation_mode=dbg"
+    ],
+    // https://github.com/cameron-martin/bazel-lsp
+    "bazel.lsp.enabled": true,
+    "bazel.lsp.command": "bazel-lsp",
+    "bazel.lsp.args": [],
+    // clangd
+    "clangd.path": "/usr/local/opt/llvm@14/bin/clangd",
+    "clangd.arguments": [
+        "--all-scopes-completion",
+        "--completion-style=bundled",
+        "--cross-file-rename",
+        "--background-index",
+        "--clang-tidy",
+        "--log=error",
+        "--pretty",
+        "--fallback-style=google",
+        "--pch-storage=disk",
+    ],
+}
