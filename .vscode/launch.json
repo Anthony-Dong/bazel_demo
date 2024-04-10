@@ -1,16 +1,29 @@
 {
     "version": "0.2.0",
     "configurations": [
+        
         {
             "type": "lldb",
             "request": "launch",
             "name": "Launch",
             "program": "bazel-bin/main",
             "cwd": "/Users/bytedance/go/src/github.com/anthony-dong/bazel_demo",
-            "sourceMap":{
+            "sourceMap": {
                 "/proc/self/cwd": "/Users/bytedance/go/src/github.com/anthony-dong/bazel_demo",
                 "/proc/self/cwd/external": "/Users/bytedance/go/src/github.com/anthony-dong/bazel_demo/bazel-bin/external",
             }
+        },
+        {
+            "type": "bazel-launch-build",
+            "name": "main",
+            "request": "launch",
+            "bazelCommand": "run",
+            "args": [
+                "--compilation_mode=dbg",
+                ":main"
+            ],
+            "cwd": "/Users/bytedance/go/src/github.com/anthony-dong/bazel_demo",
+            "verbose": true
         }
     ]
 }

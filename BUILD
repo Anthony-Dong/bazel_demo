@@ -22,7 +22,7 @@ refresh_compile_commands(
     # Specify the targets of interest.
     # For example, specify a dict of targets and any flags required to build.
     targets = {
-      "//:main": "",
+      "//...": "",
     },
     exclude_headers= "external",
     # No need to add flags already in .bazelrc. They're automatically picked up.
